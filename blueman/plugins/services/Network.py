@@ -176,7 +176,7 @@ class Network(ServicePlugin):
 	
 	def on_query_apply_state(self):
 		changed = False
-		if self.Settings["ip"]
+		if self.Settings["ip"]:
                     try:
 			self.ip_check()
 		    except Exception,e:

@@ -1,6 +1,6 @@
 from blueman.bluez.BlueZInterface import BlueZInterface
 from blueman.plugins.ManagerPlugin import ManagerPlugin
-from gi.repository import Gtk, Gio
+from gi.repository import Gtk
 
 from blueman.Sdp import *
 from blueman.Functions import *

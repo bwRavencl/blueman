@@ -17,7 +17,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 # 
 
-from gi.repository import Gtk, Gio
+from gi.repository import Gtk
 import dbus
 from blueman.Constants import *
 from blueman.plugins.ServicePlugin import ServicePlugin
@@ -30,9 +30,6 @@ from blueman.main.Mechanism import Mechanism
 
 class Audio(ServicePlugin):
 	__plugin_info__ = (_("Audio"), "audio-card")
-
-        def __init__(self):
-            self.Settings = Gio.Settings.new(BLUEMAN_AUDIO_GSCHEMA)
 
         def on_load(self, container):
 		
@@ -74,6 +71,7 @@ class Audio(ServicePlugin):
 
 	
 	def on_apply(self):
+                if self.get_options() != []:
 			vals = ["Sink"]
 			if self.cb_a2dp.props.active:
 				vals.append("Source")
@@ -94,6 +92,10 @@ class Audio(ServicePlugin):
 
 	
 	def on_query_apply_state(self):
-		self.info.props.visible = True
-		return True
-
+                opts = self.get_options()
+                if opts == []:
+                        self.info.props.visible = False
+                        return False
+                else:
+                        self.info.props.visible = True
+                        return True

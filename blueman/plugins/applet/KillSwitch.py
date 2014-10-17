@@ -1,4 +1,3 @@
-from gi.repository import GObject, Gio
 import dbus
 from blueman.Functions import *
 
@@ -22,9 +21,6 @@ class KillSwitch(AppletPlugin):
         "checked": {"type": bool, "default": False}
     }
 
-    def __init__(self):
-        self.Settings = Gio.Settings.new(BLUEMAN_KILLSWITCH_GSCHEMA)
-
     def on_load(self, applet):
         self.signals = SignalTracker()
 
@@ -39,7 +35,7 @@ class KillSwitch(AppletPlugin):
             else:
                 self.Manager = _KillSwitch.Manager()
 
-            if not self.Settings["checked"]:
+            if not self.get_option("checked"):
                 GObject.timeout_add(1000, self.check)
 
         self.signals.Handle(self.Manager, "switch-added", self.on_switch_added)
@@ -83,7 +79,7 @@ class KillSwitch(AppletPlugin):
     def check(self):
         try:
             if len(self.Manager.devices) == 0:
-                self.Settings["checked"]  = True
+                self.set_option("checked", True)
                 #this machine does not support bluetooth killswitch, let's unload
                 self.Applet.Plugins.SetConfig("KillSwitch", False)
         except:

@@ -10,7 +10,7 @@ from blueman.main.SignalTracker import SignalTracker
 
 import blueman.bluez as Bluez
 
-from gi.repository import GObject, Gio, Gtk
+from gi.repository import GObject, Gtk
 
 if not HAL_ENABLED:
     raise ImportError("NMIntegration (deprecated) requires hal support")

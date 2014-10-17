@@ -1,5 +1,5 @@
 import os
-from gi.repository import Gtk, Gdk, Gio
+from gi.repository import Gtk, Gdk
 import dbus
 import gettext
 import time
@@ -60,9 +60,6 @@ class RecentConns(AppletPlugin, Gtk.Menu):
     atexit_registered = False
 
 
-    def __init__(self):
-        self.Settings = Gio.Settings.new(BLUEMAN_PLUGINS_GSCHEMA + ".recentconns")
-
     def on_load(self, applet):
         self.Applet = applet
         self.Adapters = {}
@@ -100,7 +97,7 @@ class RecentConns(AppletPlugin, Gtk.Menu):
                                  pickle.HIGHEST_PROTOCOL),
                     9))
 
-            self.Settings["recent_connections"] = dump
+            self.set_option("recent_connections", dump)
         except:
             dprint(YELLOW("Failed to store recent connections"))
 
@@ -155,11 +152,11 @@ class RecentConns(AppletPlugin, Gtk.Menu):
         self.foreach(each, None)
 
         RecentConns.items.sort(compare_by("time"), reverse=True)
-        for i in RecentConns.items[self.Settings["max_items"]:]:
+        for i in RecentConns.items[self.get_option("max_items"):]:
             if i["gsignal"]:
                 i["device"].disconnect(i["gsignal"])
 
-        RecentConns.items = RecentConns.items[0:self.Settings["max_items"]]
+        RecentConns.items = RecentConns.items[0:self.get_option("max_items")]
         RecentConns.items.reverse()
 
         if len(RecentConns.items) == 0:
@@ -169,7 +166,7 @@ class RecentConns(AppletPlugin, Gtk.Menu):
 
         count = 0
         for item in RecentConns.items:
-            if count < self.Settings["max_items"]:
+            if count < self.get_option("max_items"):
                 self.add_item(item)
                 count += 1
 
@@ -375,7 +372,7 @@ class RecentConns(AppletPlugin, Gtk.Menu):
             raise DeviceNotFound
 
     def recover_state(self):
-        dump = self.Settings["recent_connections"]
+        dump = self.get_option("recent_connections")
         try:
             (version, items) = pickle.loads(zlib.decompress(base64.b64decode(dump)))
         except:

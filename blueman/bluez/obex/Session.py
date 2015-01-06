@@ -24,7 +24,9 @@ class Session(Base):
         self.__interface = self._get_interface(interface_name)
 
     def send_file(self, file_path):
-        def reply_handler(transfer_path, props):
+        def reply_handler(params):
+            dprint(params)
+            transfer_path, props = params
             if self.__class__.get_interface_version()[0] < 5:
                 handlers = {
                     'PropertyChanged': self.on_transfer_property_changed,

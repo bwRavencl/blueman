@@ -359,6 +359,8 @@ class RecentConns(AppletPlugin, Gtk.Menu):
             return
 
         for i in reversed(items):
+            if "name" not in i or "uuid" not in i:
+                items.remove(i)
             try:
                 i["device"] = self.get_device(i)
             except AdapterNotFound:

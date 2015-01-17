@@ -71,7 +71,10 @@ class Service(object):
     @property
     def connected(self, *args):
         if self.group == 'serial':
-            return self.serial_port_id(args[0])
+            if len(args):
+                return self.serial_port_id(args[0])
+            else:
+                return False
         elif self._service:
             return self._service.get_properties()['Connected']
         elif self._legacy_interface:

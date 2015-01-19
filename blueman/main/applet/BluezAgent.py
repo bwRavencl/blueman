@@ -154,9 +154,13 @@ class CommonAgent(GObject.GObject, Agent):
         dprint("Agent.RequestPinCode")
         dialog_msg = _("Enter PIN code for authentication:")
         notify_msg = _("Enter PIN code")
+        dprint("DBG117 Calling self.ask_passkey(" + device + ", " + dialog_msg + ", " + notify_msg + ", False, " + self.notifications + ", ok, err)")
         self.ask_passkey(device, dialog_msg, notify_msg, False, self.notifications, ok, err)
+        dprint("DBG117 self.dialog: " + self.dialog)
         if self.dialog:
+            dprint("DBG117 Calling self.dialog.present_with_time(" + self.time_func() +")")
             self.dialog.present_with_time(self.time_func())
+            dprint("DBG117 Done")
 
     @AgentMethod
     def RequestPasskey(self, device, ok, err):

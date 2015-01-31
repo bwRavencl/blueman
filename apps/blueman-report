@@ -1,0 +1,83 @@
+#!/usr/bin/python
+
+import json
+import os
+import signal
+import subprocess
+import time
+from threading import Thread, Lock
+import urllib2
+from blueman.Constants import VERSION
+
+for program in 'adapters', 'applet', 'manager', 'services':
+    id = 'blueman-' + program
+    lockfile = os.path.join(os.path.expanduser('~/.cache/'), "%s-%s" % (id, os.getuid()))
+
+    if os.path.exists(lockfile):
+        f = open(lockfile)
+        try:
+            pid = int(f.readline())
+            if os.path.exists("/proc/%s" % pid):
+                f_ = open("/proc/%s/cmdline" % pid)
+                cmdline = f_.readline().replace("\0", " ")
+                f_.close()
+                if id in cmdline:
+                    print('Terminating ' + id)
+                    os.kill(pid, signal.SIGTERM)
+        except:
+            pass
+        finally:
+            f.close()
+
+applet = subprocess.Popen(['blueman-applet'], stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+
+log = ''
+actions = []
+lines = 0
+lock = Lock()
+
+
+def copy_output():
+    global lines, log
+    for line in iter(applet.stdout.readline, b''):
+        lock.acquire()
+        lines += 1
+        log += line
+        lock.release()
+
+t = Thread(target=copy_output)
+t.daemon = True
+t.start()
+
+while True:
+    action = raw_input('Describe your next action (keep empty if done): ')
+    if not action:
+        break
+    lock.acquire()
+    lines += 1
+    log += "DEBUG ACTION: " + action + "\n"
+    lock.release()
+    actions.append((lines, action))
+    print('Perform the described action')
+    time.sleep(5)
+
+lock.acquire()
+
+data = json.dumps({'files': {'log': {'content': log}}})
+
+url = json.loads(urllib2.urlopen('https://api.github.com/gists', data).read())['html_url']
+
+print("")
+print("=====================================")
+print("")
+print("Use this data in your report:")
+print("")
+print("=====================================")
+print("")
+print("blueman: " + VERSION)
+print("BlueZ: " + subprocess.Popen(['/usr/sbin/bluetoothd', '-v'], stdout=subprocess.PIPE).stdout.read()[:-1])
+print("Distribution: ")
+print("Desktop: " + os.environ.get('XDG_CURRENT_DESKTOP'))
+print("")
+for line, action in actions:
+    print(url + '#file-log-L' + str(line) + " " + action)
